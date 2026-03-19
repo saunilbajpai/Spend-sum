@@ -1,0 +1,20 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+# Backend (Spring Boot)
+backend/target/
+backend/*.iml
+backend/.idea/
+
+# Frontend (React or Node.js)
+frontend/node_modules/
+frontend/build/
+
+backend/src/main/resources/*.properties
+backend/src/main/resources/*.yml
