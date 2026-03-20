@@ -35,3 +35,7 @@ build/
 
 docker-compose.yml
 application.properties
+
+.idea/
+.vscode/
+target/
