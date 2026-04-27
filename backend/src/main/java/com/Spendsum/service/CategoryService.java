@@ -2,17 +2,17 @@ package com.Spendsum.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import com.Spendsum.model.Category;
 import com.Spendsum.repository.CategoryRepository;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     // ✅ Create Category (with duplicate check)
     public Category createCategory(Category category) {

@@ -3,24 +3,22 @@ package com.Spendsum.service;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import com.Spendsum.model.AIInsight;
+import com.Spendsum.model.ActionType;
+import com.Spendsum.model.Severity;
 import com.Spendsum.model.User;
 import com.Spendsum.repository.AIInsightRepository;
 
 @Service
+@RequiredArgsConstructor
 public class AIInsightService {
 
-    @Autowired
-    private AIInsightRepository aiInsightRepository;
-
-    @Autowired
-    private TransactionService transactionService;
-
-    @Autowired
-    private BudgetService budgetService;
+    private final AIInsightRepository aiInsightRepository;
+    private final TransactionService transactionService;
+    private final BudgetService budgetService;
 
     // ✅ Generate Insights for User
     public List<AIInsight> generateInsights(User user) {
@@ -34,7 +32,8 @@ public class AIInsightService {
 
         AIInsight insight1 = AIInsight.builder()
                 .insightText("You are spending the most on " + topCategory + ". Try reducing it.")
-                .type("SUGGESTION")
+                .action(ActionType.SUGGESTION)
+                .severity(Severity.LOW)
                 .createdAt(LocalDateTime.now())
                 .user(user)
                 .build();
@@ -47,14 +46,16 @@ public class AIInsightService {
         if (savings < 0) {
             insights.add(AIInsight.builder()
                     .insightText("Your expenses exceed your income. You are in deficit!")
-                    .type("WARNING")
+                    .action(ActionType.WARNING)
+                    .severity(Severity.HIGH)
                     .createdAt(LocalDateTime.now())
                     .user(user)
                     .build());
         } else {
             insights.add(AIInsight.builder()
                     .insightText("Good job! You are saving money this period.")
-                    .type("INFO")
+                    .action(ActionType.SUGGESTION)
+                    .severity(Severity.LOW)
                     .createdAt(LocalDateTime.now())
                     .user(user)
                     .build());
@@ -74,7 +75,8 @@ public class AIInsightService {
                 if (exceeded) {
                     insights.add(AIInsight.builder()
                             .insightText("You exceeded your budget in " + categoryName)
-                            .type("WARNING")
+                            .action(ActionType.ALERT)
+                            .severity(Severity.HIGH)
                             .createdAt(LocalDateTime.now())
                             .user(user)
                             .build());

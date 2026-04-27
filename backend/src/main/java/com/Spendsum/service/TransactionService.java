@@ -4,7 +4,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+
+import com.Spendsum.agent.AgentService;
 
 import com.Spendsum.model.Transaction;
 import com.Spendsum.repository.TransactionRepository;
@@ -12,12 +15,21 @@ import com.Spendsum.repository.TransactionRepository;
 @Service
 public class TransactionService {
 
-    @Autowired
-    private TransactionRepository transactionRepository;
+    private final TransactionRepository transactionRepository;
+    private final AgentService agentService;
+
+    public TransactionService(TransactionRepository transactionRepository, @Lazy AgentService agentService) {
+        this.transactionRepository = transactionRepository;
+        this.agentService = agentService;
+    }
 
     // ✅ Create
     public Transaction createTransaction(Transaction transaction) {
-        return transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
+        if (saved.getUser() != null) {
+            agentService.processUser(saved.getUser().getId());
+        }
+        return saved;
     }
 
     // ✅ Get all
@@ -46,7 +58,11 @@ public class TransactionService {
         existing.setCategory(updated.getCategory());
         existing.setType(updated.getType());
 
-        return transactionRepository.save(existing);
+        Transaction saved = transactionRepository.save(existing);
+        if (saved.getUser() != null) {
+            agentService.processUser(saved.getUser().getId());
+        }
+        return saved;
     }
 
     // ✅ Delete

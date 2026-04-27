@@ -2,19 +2,19 @@ package com.Spendsum.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
 
 import com.Spendsum.model.Budget;
 import com.Spendsum.service.BudgetService;
 
 @RestController
 @RequestMapping("/api/budgets")
+@RequiredArgsConstructor
 public class BudgetController {
 
-    @Autowired
-    private BudgetService budgetService;
+    private final BudgetService budgetService;
 
     // ✅ Create
     @PostMapping

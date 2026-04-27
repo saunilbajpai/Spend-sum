@@ -20,7 +20,16 @@ public class AIInsight {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String insightText;
 
-    private String type; // WARNING, SUGGESTION, INFO
+    @Enumerated(EnumType.STRING)
+    private Severity severity;
+
+    @Enumerated(EnumType.STRING)
+    private ActionType action;
+
+    @Enumerated(EnumType.STRING)
+    private InsightSource source;
+
+    private boolean executed;
 
     private LocalDateTime createdAt;
 

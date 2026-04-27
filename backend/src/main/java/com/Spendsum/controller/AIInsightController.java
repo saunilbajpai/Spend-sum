@@ -2,9 +2,9 @@ package com.Spendsum.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
 
 import com.Spendsum.model.AIInsight;
 import com.Spendsum.model.User;
@@ -12,10 +12,10 @@ import com.Spendsum.service.AIInsightService;
 
 @RestController
 @RequestMapping("/api/insights")
+@RequiredArgsConstructor
 public class AIInsightController {
 
-    @Autowired
-    private AIInsightService aiInsightService;
+    private final AIInsightService aiInsightService;
 
     // 🔥 Generate insights
     @PostMapping("/generate")

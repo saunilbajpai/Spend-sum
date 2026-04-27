@@ -27,6 +27,11 @@ public class BudgetService {
         return budgetRepository.findAll();
     }
 
+    // ✅ Get budgets by user
+    public List<Budget> getBudgetsByUser(Long userId) {
+        return budgetRepository.findByUserId(userId);
+    }
+
     // ✅ Get by ID
     public Budget getBudgetById(Long id) {
         return budgetRepository.findById(id)
