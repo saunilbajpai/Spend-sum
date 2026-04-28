@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import { apiService } from '../services/api';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { Wallet, TrendingUp, BellRing, Bot } from 'lucide-react';
 
 const Dashboard = () => {
   const [data, setData] = useState({
@@ -25,7 +26,8 @@ const Dashboard = () => {
   const pieData = Object.keys(data.categorySpending).map(key => ({
     name: key, value: data.categorySpending[key]
   }));
-  const COLORS = ['#3b82f6', '#8b5cf6', '#ef4444', '#10b981', '#f59e0b'];
+  // Vibrant colors for the pie chart
+  const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#06b6d4'];
 
   return (
     <div>
@@ -35,10 +37,10 @@ const Dashboard = () => {
       </div>
 
       <div className="grid-4">
-        <Card title="Total Savings" value={`$${data.savings.toFixed(2)}`} glow={data.savings > 0 ? 'green' : 'red'} />
-        <Card title="Top Category" value={data.topCategory || 'N/A'} />
-        <Card title="Active Alerts" value="2" glow="purple" />
-        <Card title="Agent Status" value="Active" />
+        <Card title="Total Savings" value={`$${data.savings.toFixed(2)}`} theme="green" icon={<Wallet size={24} />} />
+        <Card title="Top Category" value={data.topCategory || 'N/A'} theme="orange" icon={<TrendingUp size={24} />} />
+        <Card title="Active Alerts" value="2" theme="purple" icon={<BellRing size={24} />} />
+        <Card title="Agent Status" value="Active" theme="blue" icon={<Bot size={24} />} />
       </div>
 
       <div className="grid-2">
@@ -52,7 +54,7 @@ const Dashboard = () => {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '8px' }}/>
+                  <RechartsTooltip contentStyle={{ background: 'rgba(24, 24, 27, 0.9)', backdropFilter: 'blur(8px)', border: '1px solid #3f3f46', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }} itemStyle={{ color: '#f8fafc', fontWeight: 600 }}/>
                 </PieChart>
               </ResponsiveContainer>
             ) : (
