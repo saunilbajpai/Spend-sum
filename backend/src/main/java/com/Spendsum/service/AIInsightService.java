@@ -95,6 +95,14 @@ public class AIInsightService {
         return aiInsightRepository.findByUserId(userId);
     }
 
+    // ✅ Set Helpful Status (Feedback Loop)
+    public AIInsight setHelpfulStatus(Long insightId, Boolean isHelpful) {
+        AIInsight insight = aiInsightRepository.findById(insightId)
+                .orElseThrow(() -> new RuntimeException("Insight not found"));
+        insight.setIsHelpful(isHelpful);
+        return aiInsightRepository.save(insight);
+    }
+
     // ✅ Delete insight
     public void deleteInsight(Long id) {
         aiInsightRepository.deleteById(id);

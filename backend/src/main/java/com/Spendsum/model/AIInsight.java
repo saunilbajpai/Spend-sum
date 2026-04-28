@@ -29,6 +29,18 @@ public class AIInsight {
     @Enumerated(EnumType.STRING)
     private InsightSource source;
 
+    @Enumerated(EnumType.STRING)
+    private AnomalyType anomalyType;
+
+    private Long processingTimeMs;
+
+    private Integer estimatedDaysToExhaustion;
+
+    private Double confidenceScore;
+
+    @Column(nullable = true)
+    private Boolean isHelpful;
+
     private boolean executed;
 
     private LocalDateTime createdAt;

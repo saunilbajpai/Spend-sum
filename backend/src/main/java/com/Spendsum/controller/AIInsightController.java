@@ -35,4 +35,13 @@ public class AIInsightController {
         aiInsightService.deleteInsight(id);
         return ResponseEntity.ok("Insight deleted successfully");
     }
+
+    // 🔥 User Feedback (Is Helpful?)
+    @PostMapping("/{id}/feedback")
+    public ResponseEntity<AIInsight> provideFeedback(
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, Boolean> payload) {
+        Boolean isHelpful = payload.get("isHelpful");
+        return ResponseEntity.ok(aiInsightService.setHelpfulStatus(id, isHelpful));
+    }
 }

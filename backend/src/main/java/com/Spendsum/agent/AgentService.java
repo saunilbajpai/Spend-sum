@@ -63,14 +63,24 @@ public class AgentService {
             return spent > b.getLimitAmount();
         }).count();
 
+        // Extract context for Gemini based on detected anomalies
+        String anomalyContext = newInsights.stream()
+            .filter(i -> i.getAnomalyType() == com.Spendsum.model.AnomalyType.VELOCITY || i.getAnomalyType() == com.Spendsum.model.AnomalyType.OVER_BUDGET)
+            .map(AIInsight::getInsightText)
+            .collect(Collectors.joining(" "));
+
         String prompt = String.format(
                 "User spending data: Total income: %.2f, Total expense: %.2f, Top category: %s, Savings: %.2f. " +
                 "User has %d active budgets, %d of which are exceeded. " +
+                "%s" +
                 "Provide highly personalized and actionable financial advice in 2-3 lines.",
-                income, expense, topCategory, savings, activeBudgets, exceededBudgets);
+                income, expense, topCategory, savings, activeBudgets, exceededBudgets,
+                anomalyContext.isEmpty() ? "" : "CRITICAL ALERTS: " + anomalyContext + " ");
 
         log.info("Querying Gemini API for user ID: {}", userId);
+        long aiStartTime = System.currentTimeMillis();
         String aiText = geminiService.generateInsight(prompt);
+        long aiLatency = System.currentTimeMillis() - aiStartTime;
 
         if (aiText != null && !aiText.trim().isEmpty()) {
             newInsights.add(AIInsight.builder()
@@ -78,6 +88,9 @@ public class AgentService {
                     .action(ActionType.SUGGESTION)
                     .severity(Severity.MEDIUM)
                     .source(InsightSource.AI_GENERATED)
+                    .anomalyType(anomalyContext.isEmpty() ? com.Spendsum.model.AnomalyType.NONE : com.Spendsum.model.AnomalyType.VELOCITY)
+                    .processingTimeMs(aiLatency)
+                    .confidenceScore(0.85) // LLM confidence proxy
                     .executed(false)
                     .createdAt(LocalDateTime.now())
                     .user(user)
