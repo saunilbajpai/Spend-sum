@@ -30,7 +30,7 @@ const Dashboard = () => {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Dashboard</h1>
+        <h1 className="page-title text-gradient">Dashboard</h1>
         <p className="page-subtitle">Welcome back. Here is your financial overview.</p>
       </div>
 
