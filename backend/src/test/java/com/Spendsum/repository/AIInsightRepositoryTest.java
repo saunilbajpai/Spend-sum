@@ -5,10 +5,12 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -31,10 +33,11 @@ class AIInsightRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
         user1 = entityManager.persistAndFlush(
-                User.builder().username("alice").email("alice@t.com").password("pass").build());
+                User.builder().username("alice").email("alice-" + suffix + "@t.com").password("pass").build());
         user2 = entityManager.persistAndFlush(
-                User.builder().username("bob").email("bob@t.com").password("pass").build());
+                User.builder().username("bob").email("bob-" + suffix + "@t.com").password("pass").build());
     }
 
     // ─── findByUserId ─────────────────────────────────────────────────────────
@@ -62,15 +65,16 @@ class AIInsightRepositoryTest {
     // ─── deleteAllByUserId ────────────────────────────────────────────────────
 
     @Test
+    @Commit // flush needed so deleteAllByUserId is visible to the subsequent reads
     @DisplayName("deleteAllByUserId: removes all insights for user, leaves others intact")
     void deleteAllByUserId_correctDeletion() {
-        entityManager.persistAndFlush(buildInsight("Tip A", user1));
-        entityManager.persistAndFlush(buildInsight("Tip B", user1));
-        entityManager.persistAndFlush(buildInsight("Bob's tip", user2));
-        entityManager.clear();
+        aiInsightRepository.save(buildInsight("Tip A", user1));
+        aiInsightRepository.save(buildInsight("Tip B", user1));
+        aiInsightRepository.save(buildInsight("Bob's tip", user2));
+        entityManager.flush();
 
         aiInsightRepository.deleteAllByUserId(user1.getId());
-        entityManager.clear();
+        aiInsightRepository.flush();
 
         assertThat(aiInsightRepository.findByUserId(user1.getId())).isEmpty();
         assertThat(aiInsightRepository.findByUserId(user2.getId())).hasSize(1);

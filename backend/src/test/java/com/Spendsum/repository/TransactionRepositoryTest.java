@@ -5,10 +5,12 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -37,11 +39,13 @@ class TransactionRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        // Persist users and category — required FK dependencies
+        // Use UUID-suffixed emails to avoid unique constraint violations
+        // across test methods when @Commit leaves data permanently in H2
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
         user1 = entityManager.persistAndFlush(
-                User.builder().username("alice").email("alice@test.com").password("pass").build());
+                User.builder().username("alice").email("alice-" + suffix + "@test.com").password("pass").build());
         user2 = entityManager.persistAndFlush(
-                User.builder().username("bob").email("bob@test.com").password("pass").build());
+                User.builder().username("bob").email("bob-" + suffix + "@test.com").password("pass").build());
         category = entityManager.persistAndFlush(
                 Category.builder().name("Food").type("EXPENSE").user(user1).build());
     }
@@ -105,29 +109,35 @@ class TransactionRepositoryTest {
     @DisplayName("entity relationship: transaction.user and transaction.category are loaded correctly")
     void entityRelationship_userAndCategoryLoaded() {
         Transaction tx = entityManager.persistAndFlush(buildExpense(200.0, user1));
+        Long txId = tx.getId();
+        Long userId = user1.getId();
+        Long catId = category.getId();
         entityManager.clear();
 
-        Transaction loaded = transactionRepository.findById(tx.getId()).orElseThrow();
+        // Use entityManager.find so JPA loads within the current test transaction
+        Transaction loaded = entityManager.find(Transaction.class, txId);
 
-        // Verify ManyToOne relationships are loaded
+        // Verify ManyToOne relationships are populated
         assertThat(loaded.getUser()).isNotNull();
-        assertThat(loaded.getUser().getEmail()).isEqualTo("alice@test.com");
+        assertThat(loaded.getUser().getId()).isEqualTo(userId);
         assertThat(loaded.getCategory()).isNotNull();
+        assertThat(loaded.getCategory().getId()).isEqualTo(catId);
         assertThat(loaded.getCategory().getName()).isEqualTo("Food");
     }
 
     // ─── deleteAllByUserId ───────────────────────────────────────────────────
 
     @Test
+    @Commit // Flush to DB so the subsequent read can see the delete
     @DisplayName("deleteAllByUserId: should remove all transactions of given user")
     void deleteAllByUserId_removesCorrectTransactions() {
-        entityManager.persistAndFlush(buildExpense(500.0, user1));
-        entityManager.persistAndFlush(buildExpense(700.0, user1));
-        entityManager.persistAndFlush(buildExpense(300.0, user2));
-        entityManager.clear();
+        Transaction t1 = transactionRepository.save(buildExpense(500.0, user1));
+        Transaction t2 = transactionRepository.save(buildExpense(700.0, user1));
+        Transaction t3 = transactionRepository.save(buildExpense(300.0, user2));
+        entityManager.flush();
 
         transactionRepository.deleteAllByUserId(user1.getId());
-        entityManager.clear();
+        transactionRepository.flush();
 
         // user1's transactions are gone
         assertThat(transactionRepository.findByUserId(user1.getId())).isEmpty();

@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -33,8 +34,9 @@ class BudgetRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
         user = entityManager.persistAndFlush(
-                User.builder().username("alice").email("alice@t.com").password("pass").build());
+                User.builder().username("alice").email("alice-" + suffix + "@t.com").password("pass").build());
         foodCategory = entityManager.persistAndFlush(
                 Category.builder().name("Food").type("EXPENSE").user(user).build());
         rentCategory = entityManager.persistAndFlush(
