@@ -1,93 +1,53 @@
-# SpendSum: Agentic Financial Assistant 💰🤖
+# SpendSum
 
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
-![Gemini AI](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=googlebard&logoColor=white)
 
-**SpendSum** is a full-stack, research-grade personal finance platform that utilizes a novel **Hybrid AI Architecture** to proactively detect financial anomalies (like spending velocity spikes and budget exhaustion risks) before they become problems.
+SpendSum is a personal finance dashboard I built for my final year research project. The main goal was to test a "hybrid" approach to AI anomaly detection in financial data—basically trying to predict when someone is going to overspend before it actually happens.
 
-Unlike traditional financial apps that only report past expenses, or pure-LLM apps that suffer from high latency and math hallucinations, SpendSum combines a **deterministic rule-engine** with the **Gemini LLM** to provide instant, mathematically-sound, and highly contextualized financial advice.
+I noticed that passing every single transaction to an LLM like Gemini is way too slow and expensive. So instead, I built a deterministic rule engine in Spring Boot that runs the math (spending velocity, budget thresholds) instantly. It acts as a filter. When a mathematical anomaly is triggered, it passes that specific context to the LLM to generate readable advice. 
 
----
+This approach cut LLM token usage by over 90% and kept the core API latency under a few milliseconds.
 
-## ✨ Key Features
+## Tech Stack
+**Backend:** Java 23, Spring Boot 3.5, MySQL, Spring Data JPA, Gemini API  
+**Frontend:** React 19, Vite, Recharts, standard CSS variables for the glass UI theme
 
-- 🧠 **Hybrid Agentic Anomaly Detection:** A strict Spring Boot rule-engine computes complex spending velocity math instantly, acting as a noise filter before selectively injecting critical alerts into the Gemini LLM for human-like advice generation.
-- ⚡ **Optimized Latency & Cost:** By pre-filtering non-critical transactions, the system reduces LLM token consumption by **92%** and ensures core API latency stays under 2ms.
-- 📊 **Research-Grade Instrumentation:** Built-in tracking for API latency, LLM confidence scores (averaging 94.3%), and a human-in-the-loop validation system to measure False Positive Rates.
-- 🎨 **Premium UI/UX:** A sleek, glassmorphic React dashboard featuring real-time Recharts visualizations and dynamic CSS-variable theming.
-- 🚀 **Automated Data Seeder:** A one-click development endpoint that instantly generates realistic financial scenarios (weekend splurges, salary deposits, forced budget breaches) to populate the system for demos.
-
----
-
-## 🏗️ Tech Stack
-
-### Backend
-* **Java 23 & Spring Boot 3.5**
-* **Spring Data JPA & Hibernate**
-* **MySQL** (Database)
-* **Google Gemini API** (LLM Integration)
-* **Maven** (Build Tool) & **JUnit/Mockito** (Testing)
-
-### Frontend
-* **React 19** (Functional Components, JSX)
-* **Vite** (Build Tool)
-* **Recharts** (Data Visualization)
-* **Lucide-React** (Iconography)
-* **Vanilla CSS** (Custom Design System, Glassmorphism)
+## Features
+- **Hybrid Anomaly Detection:** Rule-based engine handles the math; Gemini LLM handles the advice generation.
+- **Async Processing:** AI calls are decoupled from the main thread so the UI never blocks.
+- **Research Metrics Tracking:** The app logs API latency, LLM confidence scores, and user feedback (helpful/not helpful) directly to the database so I could pull metrics for my paper.
+- **Dev Seeder:** A built-in endpoint to flood the database with realistic transactions (weekends, rent, salary) to test the anomaly triggers.
 
 ---
 
-## 🚀 Getting Started
+## Running it locally
 
-### Prerequisites
-- JDK 23
-- Node.js & npm
-- MySQL Server running on port `3307` (or updated in properties)
-- A Google Gemini API Key
-
-### 1. Backend Setup
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Update `src/main/resources/application.properties` with your MySQL credentials and Gemini API key.
-3. Run the Spring Boot application:
+### 1. Database & Backend
+First, make sure you have a local MySQL instance running. 
+1. `cd backend`
+2. Update `src/main/resources/application.properties` with your local database credentials and your Gemini API key.
+3. Run it using maven:
    ```bash
    mvn spring-boot:run
    ```
-*The backend will run on `http://localhost:8080`.*
+The backend starts on `localhost:8080`.
 
-### 2. Frontend Setup
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-*The frontend will run on `http://localhost:5173`.*
+### 2. Frontend
+1. `cd frontend`
+2. `npm install`
+3. `npm run dev`
 
-### 3. Generate Demo Data (Optional but Recommended)
-To instantly populate the dashboard with realistic charts, transactions, and AI insights, run the following command while the backend is running:
+The frontend will be available at `localhost:5173`. 
+
+### 3. Loading Test Data
+If you want to test the charts and AI triggers without manually typing in 100 transactions, I wrote a seeder script. While the backend is running, just hit:
 ```bash
 curl -X POST http://localhost:8080/api/dev/seed?reset=true
 ```
+This will clear old data, generate a realistic month of spending, force a budget breach, and trigger the AI insights automatically.
 
----
+## Screenshots
 
-## 📸 Screenshots
-
-*(Add screenshots of your Dashboard, AI Insights Panel, and Metrics pages here!)*
-
----
-
-## 🔬 Research Thesis
-This project serves as the foundation for the research paper: *"A Hybrid Agentic Approach to Early Financial Anomaly Detection: Combining Deterministic Rules with Generative AI"*. By separating mathematical constraints from contextual generation, SpendSum proves that hybrid agentic systems are vastly superior in cost, speed, and reliability for modern Fintech applications.
+*(Add your screenshots here)*
